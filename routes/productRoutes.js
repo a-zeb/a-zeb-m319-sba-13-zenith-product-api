@@ -13,7 +13,26 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
     try {
-        const products = await Product.find();
+        const { category, minPrice, maxPrice, sortBy, page = 1, limit = 10 } = req.query;
+        let query = {};
+
+        if (category) query.category = category;
+        if (minPrice || maxPrice) {
+            query.price = {};
+            if (minPrice) query.price.$gte = Number(minPrice);
+            if (maxPrice) query.price.$lte = Number(maxPrice);
+        }
+
+        let sortOption = { createdAt: -1 };
+        if (sortBy === "price_asc") sortOption = { price: 1 };
+        if (sortBy === "price_desc") sortOption = { price: -1 };
+        const skip = (Number(page) - 1) * Number(limit);
+
+        const products = await Product.find(query)
+            .sort(sortOption)
+            .limit(Number(limit))
+            .skip(skip);
+
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ error: error.message });
