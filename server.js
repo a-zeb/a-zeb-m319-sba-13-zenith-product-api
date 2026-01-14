@@ -5,6 +5,10 @@ const app = express();
 require("dotenv").config();
 const PORT = process.env.PORT;
 
+// DATABASE
+const connectDB = require("./db/connection");
+connectDB();
+
 // MIDDLEWARE
 app.use(express.json());
 
